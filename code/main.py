@@ -147,3 +147,21 @@ async def get_job_exceptions(job_id: str) -> str:
     except Exception as e:
         logger.error(f"Failed to get job exceptions: {e}")
         return f"Error: {str(e)}"
+    
+    
+@mcp.tool()
+async def list_jar_files() -> str:
+    """List all uploaded JARs in the Flink cluster."""
+    url = f"{FLINK_URL}/jars"
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            jars = response.json().get("files", [])
+
+        if not jars:
+            return "No JARs uploaded."
+
+        return "\n".join([f"{jar['id']} - {jar['name']}" for jar in jars])
+    except Exception as e:
+        logger.error(f"Failed to list jars: {e}")
+        return f"Error: {str(e)}"
