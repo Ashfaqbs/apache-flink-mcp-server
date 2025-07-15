@@ -79,3 +79,25 @@ async def list_jobs() -> str:
     except Exception as e:
         logger.error(f"Failed to fetch job list: {e}")
         return f"Error fetching jobs: {str(e)}"
+
+
+@mcp.tool()
+async def get_job_details(job_id: str) -> str:
+    """Get details of a specific Flink job by job ID."""
+    url = f"{FLINK_URL}/jobs/{job_id}"
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            job = response.json()
+
+        return (
+            f"Job ID: {job.get('jid')}\n"
+            f"Name: {job.get('name')}\n"
+            f"State: {job.get('state')}\n"
+            f"Start Time: {job.get('start-time')}\n"
+            f"Duration (ms): {job.get('duration')}\n"
+            f"Max Parallelism: {job.get('maxParallelism')}"
+        )
+    except Exception as e:
+        logger.error(f"Failed to get job details: {e}")
+        return f"Error getting job details: {str(e)}"
