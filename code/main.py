@@ -53,3 +53,29 @@ async def get_cluster_info() -> str:
     except Exception as e:
         logger.error(f"Failed to fetch cluster info: {e}")
         return f"Error fetching cluster info: {str(e)}"
+    
+    
+
+
+
+@mcp.tool()
+async def list_jobs() -> str:
+    """List all current and recent Flink jobs with their status."""
+    url = f"{FLINK_URL}/jobs/overview"
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            jobs = response.json().get("jobs", [])
+
+        if not jobs:
+            return "No jobs found."
+
+        result = ["Flink Jobs Overview:"]
+        for job in jobs:
+            result.append(
+                f"- ID: {job.get('jid')} | Name: {job.get('name')} | State: {job.get('state')}"
+            )
+        return "\n".join(result)
+    except Exception as e:
+        logger.error(f"Failed to fetch job list: {e}")
+        return f"Error fetching jobs: {str(e)}"
