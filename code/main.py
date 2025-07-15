@@ -22,3 +22,9 @@ parser.add_argument(
     default=os.getenv("FLINK_API_BASE_URL", "http://localhost:8081"),
     help="Base URL of Flink REST API"
 )
+
+
+args, _ = parser.parse_known_args()
+FLINK_URL = args.flink_url
+
+logger.info(f"Connecting to Flink REST at: {FLINK_URL}")
