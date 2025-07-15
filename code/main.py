@@ -11,3 +11,6 @@ logging.basicConfig(
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger("flink-mcp-server")
+
+
+mcp = FastMCP("Apache Flink MCP Server")
