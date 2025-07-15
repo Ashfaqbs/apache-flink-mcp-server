@@ -2,6 +2,8 @@
 
 A Model Context Protocol (MCP) server implementation for Apache Flink that enables AI assistants and large language models to interact with Flink clusters through natural language interfaces. This server provides comprehensive tools for monitoring, managing, and analyzing Apache Flink streaming applications.
 
+![alt text](assets/image.png)
+
 ## Overview
 
 The Apache Flink MCP Server bridges the gap between AI assistants (like Claude Desktop) and Apache Flink clusters by providing a standardized MCP interface. It allows users to perform complex Flink operations through conversational AI, making stream processing management more accessible and intuitive.
