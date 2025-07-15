@@ -205,3 +205,13 @@ async def get_job_metrics(job_id: str) -> str:
     except Exception as e:
         logger.error(f"Failed to get job metrics: {e}")
         return f"Error: {str(e)}"
+
+
+
+if __name__ == "__main__":
+    try:
+        logger.info("Starting Flink MCP server...")
+        mcp.run()
+    except Exception as e:
+        logger.error(f"Server error: {str(e)}")
+        sys.exit(1)
