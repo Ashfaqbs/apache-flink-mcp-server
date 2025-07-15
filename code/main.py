@@ -165,3 +165,43 @@ async def list_jar_files() -> str:
     except Exception as e:
         logger.error(f"Failed to list jars: {e}")
         return f"Error: {str(e)}"
+    
+    
+
+@mcp.tool()
+async def get_job_metrics(job_id: str) -> str:
+    """Fetch selected useful metrics for a running Flink job."""
+    base_url = f"{FLINK_URL}/jobs/{job_id}/metrics"
+    try:
+        async with httpx.AsyncClient() as client:
+           
+            r = await client.get(base_url)
+            available_metrics = r.json()
+            metric_ids = [m["id"] for m in available_metrics]
+
+            
+            common = [
+                "uptime",
+                "runningTime",
+                "numberOfCompletedCheckpoints",
+                "numberOfFailedCheckpoints",
+                "numRestarts",
+                "lastCheckpointDuration"
+            ]
+            selected = [m for m in common if m in metric_ids]
+            if not selected:
+                return "No common metrics available for this job."
+
+            
+            get_param = ",".join(selected)
+            r = await client.get(f"{base_url}?get={get_param}")
+            values = r.json()
+
+        
+        return "\n".join([
+            f"{m['id']}: {m.get('value', '<no value>')}"
+            for m in values
+        ])
+    except Exception as e:
+        logger.error(f"Failed to get job metrics: {e}")
+        return f"Error: {str(e)}"
