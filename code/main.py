@@ -126,3 +126,24 @@ async def list_taskmanagers() -> str:
     except Exception as e:
         logger.error(f"Failed to list TaskManagers: {e}")
         return f"Error listing TaskManagers: {str(e)}"
+    
+
+@mcp.tool()
+async def get_job_exceptions(job_id: str) -> str:
+    """Fetch exceptions that occurred in the specified job."""
+    url = f"{FLINK_URL}/jobs/{job_id}/exceptions"
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            exceptions = response.json().get("allExceptions", [])
+
+        if not exceptions:
+            return "No exceptions found for this job."
+
+        result = ["Job Exceptions:"]
+        for e in exceptions:
+            result.append(f"- {e.get('exception')} at {e.get('timestamp')}")
+        return "\n".join(result)
+    except Exception as e:
+        logger.error(f"Failed to get job exceptions: {e}")
+        return f"Error: {str(e)}"
