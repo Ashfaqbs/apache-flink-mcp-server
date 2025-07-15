@@ -101,3 +101,28 @@ async def get_job_details(job_id: str) -> str:
     except Exception as e:
         logger.error(f"Failed to get job details: {e}")
         return f"Error getting job details: {str(e)}"
+    
+
+@mcp.tool()
+async def list_taskmanagers() -> str:
+    """List all registered TaskManagers in the Flink cluster."""
+    url = f"{FLINK_URL}/taskmanagers"
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            tms = response.json().get("taskmanagers", [])
+
+        if not tms:
+            return "No TaskManagers registered."
+
+        result = ["TaskManagers:"]
+        for tm in tms:
+            result.append(
+                f"- ID: {tm.get('id')}\n"
+                f"  Slots: {tm.get('slotsNumber')} | Free: {tm.get('freeSlots')}\n"
+                f"  CPU Cores: {tm.get('hardware').get('cpuCores') if tm.get('hardware') else 'n/a'}"
+            )
+        return "\n".join(result)
+    except Exception as e:
+        logger.error(f"Failed to list TaskManagers: {e}")
+        return f"Error listing TaskManagers: {str(e)}"
