@@ -6,7 +6,7 @@ A Model Context Protocol (MCP) server implementation for Apache Flink that enabl
 
 ## Overview
 
-The Apache Flink MCP Server bridges the gap between AI assistants (like Claude Desktop) and Apache Flink clusters by providing a standardized MCP interface. It allows users to perform complex Flink operations through conversational AI, making stream processing management more accessible and intuitive.
+The Apache Flink MCP Server bridges the gap between AI assistants and Apache Flink clusters by providing a standardized MCP interface. It allows users to perform complex Flink operations through conversational AI, making stream processing management more accessible and intuitive.
 
 ## Features
 
@@ -17,14 +17,20 @@ The Apache Flink MCP Server bridges the gap between AI assistants (like Claude D
 - **Resource Management**: Monitor TaskManager resources and JAR file deployments
 - **Metrics Collection**: Access comprehensive job and cluster metrics
 
-### 🔧 Available Tools
-- `get_cluster_info`: Fetch overview of Flink cluster status
-- `list_jobs`: List all current and recent Flink jobs with their status
-- `get_job_details`: Get detailed information about specific Flink jobs
-- `list_taskmanagers`: List all registered TaskManagers in the cluster
-- `get_job_exceptions`: Retrieve exceptions that occurred in jobs
-- `list_jar_files`: List all uploaded JAR files in the cluster
-- `get_job_metrics`: Fetch useful metrics for running Flink jobs
+### 🔧 Available Tools:
+
+1. `initialize_flink_connection` – Connect to Flink REST API
+2. `get_connection_status` – Check connection status
+3. `get_cluster_info` – Overview of the Flink cluster
+4. `list_jobs` – List all Flink jobs with status
+5. `get_job_details` – Comprehensive job details by ID
+6. `get_job_exceptions` – Fetch job-level exceptions
+7. `get_job_metrics` – Fetch metrics for a job
+8. `list_taskmanagers` – List TaskManagers with resources
+9. `list_jar_files` – List uploaded JAR files
+10. `send mail` – (Send an email notification)
+
+---
 
 ### 🚀 Benefits
 - **Natural Language Interface**: Interact with Flink using conversational AI
@@ -38,25 +44,21 @@ The Apache Flink MCP Server bridges the gap between AI assistants (like Claude D
 ### Prerequisites
 - Apache Flink cluster (running and accessible)
 - Python 3.8 or higher
-- MCP-compatible client (Claude Desktop, etc.)
+- MCP-compatible client (Claude Desktop, Continue etc.)
 
 
 ### Client Configuration
 
-#### Claude Desktop
-Add to your Claude Desktop configuration (`claude_desktop_config.json`):
-```json
-{
-  "mcpServers": {
-    "apache-flink": {
-      "command": "python",
-      "args": ["/path/to/apache-flink-mcp-server/server.py"],
-      "env": {
-        "FLINK_REST_URL": "http://localhost:8081"
-      }
-    }
-  }
-}
+#### Continue Desktop
+Add to your Claude Desktop configuration (`Flink-mcp-server.yaml`):
+```yaml
+name: Sample MCP
+version: 0.0.1
+schema: v1
+mcpServers:
+  - name: Flink MCP Server
+    type: streamable-http
+    url:   http://127.0.0.1:9090/mcp/ 
 ```
 
 ## Usage Examples
@@ -129,13 +131,20 @@ AI: Let me check your TaskManager status and resource allocation.
 - `job_id` (string, required): The unique identifier of the Flink job
 
 
+---
+
+#### `send_mail`
+
+**Description**: Send an email notification, such as alerts, status updates, or reports from the Flink MCP server.
+
+
+
 ## Troubleshooting
 
 ### Common Issues
 
 **Connection Failed**
 - Verify Flink cluster is running and accessible
-- Check `FLINK_REST_URL` configuration
 - Ensure network connectivity to Flink JobManager
 
 **Permission Errors**
@@ -147,7 +156,7 @@ AI: Let me check your TaskManager status and resource allocation.
 Enable detailed logging:
 ```bash
 export LOG_LEVEL=DEBUG
-python server.py
+python mcp_server.py
 ```
 
 ## Contributing
@@ -174,13 +183,16 @@ This project is licensed under the [MIT License](LICENSE).
 
 - [Model Context Protocol](https://github.com/modelcontextprotocol) - The MCP specification
 - [Apache Flink](https://github.com/apache/flink) - Apache Flink stream processing framework
-- [MCP Confluent](https://github.com/confluentinc/mcp-confluent) - MCP server for Confluent/Kafka
-- [Airflow MCP Server](https://github.com/abhishekbhakat/airflow-mcp-server) - MCP server for Apache Airflow
+- [MCP Kafka](https://github.com/Ashfaqbs/KafkaIQ) - MCP server for Confluent/Kafka
+- [MCP Container](https://github.com/Ashfaqbs/ContainMind) - MCP server forContainer's
+
 
 ## Support
 
 - **Issues**: [GitHub Issues](https://github.com/Ashfaqbs/apache-flink-mcp-server/issues)
 - **Documentation**: [Project Wiki](https://github.com/Ashfaqbs/apache-flink-mcp-server/wiki)
+
+- **Discussions**: [Project Discussions](https://github.com/Ashfaqbs/apache-flink-mcp-server/discussions/)
 
 ## Acknowledgments
 
