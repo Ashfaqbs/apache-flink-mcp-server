@@ -1,0 +1,7 @@
+name: Sample MCP
+version: 0.0.1
+schema: v1
+mcpServers:
+  - name: Flink MCP Server
+    type: streamable-http
+    url:   http://127.0.0.1:9090/mcp/ 
