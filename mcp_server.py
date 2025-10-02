@@ -1469,6 +1469,7 @@ def main():
         logger.info("  📈 get_job_metrics: Fetch metrics for a job")
         logger.info("  💻 list_taskmanagers: List TaskManagers with resources")
         logger.info("  📦 list_jar_files: List uploaded JAR files")
+        logger.info("  📧 send_mail: Send an email notification")
         logger.info("=" * 60)
         logger.info("Server starting on http://127.0.0.1:9090")
         logger.info("=" * 60)
