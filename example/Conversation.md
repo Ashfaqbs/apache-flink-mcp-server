@@ -250,15 +250,203 @@ Would you like help with any other cluster operations?
 
 ---
 
+## Test 10: Get TaskManager Details
+**User:** Show me detailed information about TaskManager 172.20.0.3:38373-66c42c
+
+**Assistant:** I'll get comprehensive details for that TaskManager.
+
+Here's the complete analysis of your TaskManager:
+
+**Basic Information:**
+- **ID:** 172.20.0.3:38373-66c42c
+- **Data Port:** 46807
+- **JMX Port:** Disabled
+- **Last Heartbeat:** 2025-10-02 17:26:16 (Active)
+
+**Slot Allocation:**
+- **Total Slots:** 1
+- **Used:** 1 (100%) - Fully utilized
+- **Free:** 0 (0%) - No capacity
+- ⚠️ **WARNING:** No free slots available!
+
+**Allocated Job:**
+- Job ID: 7874e8e0d0e46d1aaf06bd01693363c0
+- CPU Cores: 1.0
+- Task Heap: 383 MB
+- Managed Memory: 512 MB
+- Network Memory: 128 MB
+
+**Hardware Resources:**
+- **CPU:** 16 cores (only 1 slot configured - massive underutilization!)
+- **Physical Memory:** 7.63 GB
+- **Free Memory:** 512 MB (6.6% free)
+- **Memory Usage:** 7.13 GB (93.4% used - running hot!)
+
+**Real-Time Metrics:**
+- **Heap Memory:** 168.80 MB / 512 MB (33% used) ✅
+- **Non-Heap Memory:** 78.23 MB / 704 MB
+- **Direct Memory:** 136.17 MB / 136.17 MB (100% used)
+- **Network Buffers:** 4,096 available (all free)
+- **Garbage Collection:** 8 collections, 96ms total (efficient)
+
+**Memory Configuration:**
+- Framework Heap: 128 MB
+- Task Heap: 384 MB
+- Managed Memory: 512 MB
+- Network Memory: 128 MB
+- Total Flink Memory: 1.25 GB
+- Total Process Memory: 1.69 GB
+
+**Analysis:**
+Your TaskManager is healthy but severely underutilized. With 16 CPU cores but only 1 slot, you're wasting 94% of your CPU capacity. The memory usage is high (93.4%), but heap usage is only 33%, suggesting the memory is used by the OS or other processes.
+
+**Recommendations:**
+- Increase `taskmanager.numberOfTaskSlots` to 8-12 to better utilize CPU cores
+- Monitor memory carefully when adding more slots
+- Consider vertical scaling if you need more memory per slot
+
+---
+
+## Test 11: Query Specific TaskManager Metrics
+**User:** Get CPU and memory metrics for TaskManager 172.20.0.3:38373-66c42c
+
+**Assistant:** I'll fetch specific metrics for that TaskManager.
+
+Here are the key metrics:
+
+**CPU:**
+- **Load:** 0.05% (very low - plenty of capacity)
+
+**Memory:**
+- **Heap Used:** 191.77 MB
+- **Heap Max:** 512.00 MB
+- **Heap Utilization:** 37.5%
+
+**Flink Managed Memory:**
+- **Used:** 0 B
+- **Total:** 512.00 MB
+- **Available:** 100%
+
+**Threads:**
+- **Active Threads:** 51
+
+**Analysis:**
+- ✅ CPU is barely utilized (0.05%)
+- ✅ Heap memory is healthy (37.5%)
+- ✅ No managed memory in use (stateless workload)
+- ✅ Thread count is normal
+
+This TaskManager has massive capacity available for more workloads!
+
+---
+
+## Test 12: Check Backpressure for Running Job
+**User:** Check if there's any backpressure in the running job's operator
+
+**Assistant:** I'll analyze backpressure for that operator.
+
+**Backpressure Analysis Results:**
+
+**Overall Status:**
+- ✅ **Status:** OK
+- ✅ **Backpressure Level:** No issues
+- 📅 **Measured:** 2025-10-02 17:26:54
+
+**Subtask Breakdown:**
+- **Subtask #0:**
+  - Status: ✅ OK
+  - Backpressure Ratio: 0.00%
+  - Idle Ratio: 0.00%
+  - Busy Ratio: N/A
+
+**Analysis & Recommendations:**
+✅ **Operator is processing data smoothly with no backpressure.**
+   No action needed.
+
+This operator is performing optimally! There's no backpressure, meaning:
+- Data is flowing smoothly through the pipeline
+- The operator can keep up with incoming data
+- No bottlenecks detected
+- Downstream consumers are processing data efficiently
+
+Your job is healthy and well-tuned! 🎯
+
+---
+
+## Test 13: List Available TaskManager Metrics
+**User:** What metrics are available for TaskManager 172.20.0.3:38373-66c42c?
+
+**Assistant:** I'll list all available metrics for that TaskManager.
+
+**Available Metrics (40 total):**
+
+**CPU Metrics:**
+- Status.JVM.CPU.Load
+- Status.JVM.CPU.Time
+
+**Memory Metrics:**
+- Status.JVM.Memory.Heap.Used
+- Status.JVM.Memory.Heap.Max
+- Status.JVM.Memory.Heap.Committed
+- Status.JVM.Memory.NonHeap.Used
+- Status.JVM.Memory.NonHeap.Max
+- Status.JVM.Memory.Direct.MemoryUsed
+- Status.JVM.Memory.Metaspace.Used
+- Status.Flink.Memory.Managed.Used
+- Status.Flink.Memory.Managed.Total
+
+**Garbage Collection:**
+- Status.JVM.GarbageCollector.All.Count
+- Status.JVM.GarbageCollector.All.Time
+- Status.JVM.GarbageCollector.G1_Young_Generation.Count
+- Status.JVM.GarbageCollector.G1_Old_Generation.Count
+
+**Network Metrics:**
+- Status.Network.AvailableMemorySegments
+- Status.Network.TotalMemorySegments
+- Status.Shuffle.Netty.AvailableMemory
+- Status.Shuffle.Netty.UsedMemory
+
+**Thread Metrics:**
+- Status.JVM.Threads.Count
+
+**💡 TIP:** To query specific metrics, use:
+```
+metric_names="Status.JVM.CPU.Load,Status.JVM.Memory.Heap.Used"
+```
+
+This gives you fine-grained control over which metrics to monitor!
+
+---
+
 ## Summary
 
-This document demonstrates the enhanced Flink MCP tools providing:
+This document demonstrates the **12 comprehensive Flink MCP tools** providing:
 
-✅ **Comprehensive Information** - Detailed metrics, configurations, and analysis
-✅ **Better Error Handling** - Clear error messages with actionable solutions  
-✅ **Performance Insights** - Utilization analysis and optimization recommendations
-✅ **Resource Monitoring** - Complete hardware and memory breakdowns
-✅ **Exception Debugging** - Full stack traces with root cause analysis
-✅ **Health Assessment** - Clear visual indicators of job and cluster health
+### **Connection Management**
+✅ Initialize connection to Flink cluster
+✅ Check connection status
 
-The tools now provide enterprise-grade monitoring and debugging capabilities for Apache Flink clusters!
+### **Cluster Monitoring**
+✅ Get cluster overview and capacity
+✅ List all jobs with status
+✅ Get detailed job information with execution plan
+✅ Fetch job metrics and checkpointing stats
+✅ List all TaskManagers with resource breakdown
+
+### **Deep Diagnostics**
+✅ Get detailed TaskManager information with real-time metrics
+✅ Query specific TaskManager metrics flexibly
+✅ Analyze operator backpressure for bottleneck detection
+✅ Retrieve job exceptions with root cause analysis
+✅ List uploaded JAR files
+
+### **Key Features**
+- 📊 **Real-time Metrics** - CPU, memory, GC, network, checkpoints
+- 🔍 **Root Cause Analysis** - Stack traces with explanations
+- ⚡ **Performance Insights** - Backpressure detection and utilization analysis
+- 💡 **Actionable Recommendations** - Configuration tuning suggestions
+- 🎨 **Visual Indicators** - Color-coded status (✅⚠️🔴)
+- 📈 **Trend Analysis** - Historical job performance data
+
+The tools now provide **enterprise-grade monitoring, debugging, and optimization capabilities** for Apache Flink clusters!
