@@ -1,0 +1,18 @@
+{"mcpServers": {
+"Flink-Mcp": {
+    "command": "uv",
+    "args": [
+        "run",
+        "--with",
+        "fastmcp",
+        "fastmcp",
+        "run",
+        "path\\to\\proxy.py" 
+    ],
+    "env": {},
+    "transport": "stdio"
+}
+
+    }
+    
+}
