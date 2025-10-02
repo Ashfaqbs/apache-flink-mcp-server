@@ -38,7 +38,7 @@ def check_initialized():
         return False, "Flink connection not initialized. Please call initialize_flink_connection first."
     return True, None
 
-## ** Working 
+
 @mcp.tool() 
 async def initialize_flink_connection(flink_url: str) -> str:
     """
@@ -65,7 +65,7 @@ async def initialize_flink_connection(flink_url: str) -> str:
         logger.error(f"Failed to connect to Flink: {e}")
         return f"✗ Failed to connect to Flink at {flink_url}: {str(e)}"
 
-## ** Working 
+
 @mcp.tool()
 async def get_connection_status() -> str:
     """Check if Flink connection is initialized and get current URL."""
@@ -74,7 +74,7 @@ async def get_connection_status() -> str:
     else:
         return "✗ Not connected. Use initialize_flink_connection to connect."
 
-## ** Working
+
 @mcp.tool()
 async def get_cluster_info() -> str:
     """Fetch an overview of the Flink cluster: jobs, slots, taskmanagers."""
@@ -103,7 +103,7 @@ async def get_cluster_info() -> str:
         logger.error(f"Failed to fetch cluster info: {e}")
         return f"Error fetching cluster info: {str(e)}"
 
-## ** Working
+
 @mcp.tool()
 async def list_jobs() -> str:
     """List all current and recent Flink jobs with their status."""
@@ -131,7 +131,7 @@ async def list_jobs() -> str:
         logger.error(f"Failed to fetch job list: {e}")
         return f"Error fetching jobs: {str(e)}"
 
-## ** Working
+
 @mcp.tool()
 async def get_job_details(job_id: str) -> str:
     """Get comprehensive details of a specific Flink job by job ID including configuration, 
@@ -462,7 +462,7 @@ def _chunk(seq, n):
         
         
         
-## ** Working
+
 @mcp.tool()
 async def list_taskmanagers() -> str:
     """List all registered TaskManagers in the Flink cluster with detailed resource information."""
@@ -646,7 +646,7 @@ async def list_taskmanagers() -> str:
         return f"❌ Error listing TaskManagers: {str(e)}"
 
 
-## ** Working
+
 @mcp.tool()
 async def get_job_exceptions(job_id: str) -> str:
     """Fetch exceptions that occurred in the specified job."""
@@ -727,7 +727,7 @@ async def get_job_exceptions(job_id: str) -> str:
         logger.error(f"Failed to get job exceptions: {e}")
         return f"Error: {str(e)}"
 
-## ** Working
+
 @mcp.tool()
 async def list_jar_files() -> str:
     """List all uploaded JARs in the Flink cluster."""
@@ -751,7 +751,7 @@ async def list_jar_files() -> str:
         return f"Error: {str(e)}"
 
 
-## ** Working
+
 @mcp.tool()
 async def get_job_metrics(job_id: str) -> str:
     """Fetch selected useful metrics for a running Flink job; produce a diagnostic summary."""
