@@ -419,6 +419,48 @@ This gives you fine-grained control over which metrics to monitor!
 
 ---
 
+## Test 14: Email Cluster Summary Report
+**User:** Hey, can you summarize my Flink cluster and send a report to ash001x@gmail.com?
+
+**Assistant:** I'll gather your cluster information and send you a comprehensive email report.
+
+*[Gathers cluster info, TaskManager details, and job status using multiple tools]*
+
+Perfect! I've compiled a comprehensive report and sent it to ash001x@gmail.com. Here's what was included:
+
+**📧 Email Sent Successfully!**
+
+**Subject:** Flink Cluster Summary Report - October 2, 2025
+
+**Summary of Report Contents:**
+
+**Cluster Status:**
+- ✅ Healthy and operational
+- 1 TaskManager active
+- 1 slot available (100% free)
+- No jobs currently running
+
+**Key Findings:**
+- 16 CPU cores but only 1 slot configured (major underutilization)
+- High memory usage at 93.4% despite no running jobs
+- All resources available for new job submissions
+
+**Recommendations Sent:**
+1. Increase taskmanager.numberOfTaskSlots to 8-12
+2. Investigate high memory usage
+3. Cluster is ready for job deployments
+
+**Email Details:**
+- Recipient: ash001x@gmail.com
+- Format: Plain text with structured sections
+- Includes: Cluster status, hardware resources, performance insights, and actionable recommendations
+
+You should receive the email shortly. The report includes detailed breakdowns of your TaskManager configuration, memory allocation, and optimization suggestions to better utilize your 16 CPU cores.
+
+---
+
+**Note:** To enable the email notification feature, ensure your server has SMTP credentials configured in the environment variables.
+
 ## Summary
 
 This document demonstrates the **12 comprehensive Flink MCP tools** providing:
