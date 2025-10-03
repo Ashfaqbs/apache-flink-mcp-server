@@ -49,8 +49,8 @@ The Apache Flink MCP Server bridges the gap between AI assistants and Apache Fli
 
 ### Client Configuration
 
-#### Continue Desktop
-Add to your Claude Desktop configuration (`Flink-mcp-server.yaml`):
+#### Continue.dev
+Add to your Continue configuration (`Flink-mcp-server.yaml`):
 ```yaml
 name: Sample MCP
 version: 0.0.1
