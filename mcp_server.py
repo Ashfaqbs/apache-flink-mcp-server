@@ -25,64 +25,89 @@ logger = logging.getLogger("flink-mcp-server")
 
 mcp = FastMCP("Apache Flink MCP Server")
 
-# Global state for Flink connection
-FLINK_CONNECTION = {
-    "url": None,
-    "initialized": False
-}
+# Named Flink connections, keyed by connection name. Supports multiple Flink
+# clusters/apps in the same server process - each tool call targets one by name,
+# defaulting to "default" so existing single-cluster usage keeps working unchanged.
+CONNECTIONS: Dict[str, Dict[str, Any]] = {}
 
 
-def check_initialized():
-    """Helper to verify Flink connection is initialized."""
-    if not FLINK_CONNECTION["initialized"]:
-        return False, "Flink connection not initialized. Please call initialize_flink_connection first."
+def check_initialized(connection: str = "default"):
+    """Helper to verify the named Flink connection is initialized."""
+    conn = CONNECTIONS.get(connection)
+    if not conn or not conn.get("initialized"):
+        return False, (
+            f"Flink connection '{connection}' not initialized. "
+            f"Please call initialize_flink_connection first."
+        )
     return True, None
 
 
-@mcp.tool() 
-async def initialize_flink_connection(flink_url: str) -> str:
+@mcp.tool()
+async def initialize_flink_connection(flink_url: str, connection: str = "default") -> str:
     """
-    Initialize connection to Apache Flink REST API.
+    Initialize connection to an Apache Flink REST API.
     Must be called before using any other Flink tools.
-    
+
     Args:
         flink_url: Base URL of Flink REST API (e.g., http://localhost:8081)
+        connection: Name for this connection, used to target this cluster in later
+                    tool calls. Defaults to "default". Register a different name per
+                    Flink app/cluster to work with more than one at the same time.
     """
     # Remove trailing slash if present
     flink_url = flink_url.rstrip('/')
-    
+
     # Test the connection
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(f"{flink_url}/overview", timeout=5.0)
             response.raise_for_status()
-            
-        FLINK_CONNECTION["url"] = flink_url
-        FLINK_CONNECTION["initialized"] = True
-        logger.info(f"Successfully connected to Flink at: {flink_url}")
-        return f"✓ Successfully connected to Flink cluster at {flink_url}"
+
+        CONNECTIONS[connection] = {"url": flink_url, "initialized": True}
+        logger.info(f"Successfully connected to Flink '{connection}' at: {flink_url}")
+        return f"✓ Successfully connected to Flink cluster '{connection}' at {flink_url}"
     except Exception as e:
         logger.error(f"Failed to connect to Flink: {e}")
         return f"✗ Failed to connect to Flink at {flink_url}: {str(e)}"
 
 
 @mcp.tool()
-async def get_connection_status() -> str:
-    """Check if Flink connection is initialized and get current URL."""
-    if FLINK_CONNECTION["initialized"]:
-        return f"✓ Connected to: {FLINK_CONNECTION['url']}"
-    else:
+async def get_connection_status(connection: Optional[str] = None) -> str:
+    """Check Flink connection status.
+
+    Args:
+        connection: Optional connection name to check. If omitted, lists all
+                    registered connections and their status.
+    """
+    if connection is not None:
+        conn = CONNECTIONS.get(connection)
+        if conn and conn.get("initialized"):
+            return f"✓ Connected to '{connection}': {conn['url']}"
+        return f"✗ Not connected: '{connection}'. Use initialize_flink_connection to connect."
+
+    if not CONNECTIONS:
         return "✗ Not connected. Use initialize_flink_connection to connect."
+
+    lines = ["Registered Flink connections:"]
+    for name, conn in CONNECTIONS.items():
+        mark = "✓" if conn.get("initialized") else "✗"
+        lines.append(f"  {mark} {name}: {conn.get('url')}")
+    return "\n".join(lines)
 
 
 @mcp.tool()
-async def get_cluster_info() -> str:
-    """Fetch an overview of the Flink cluster: jobs, slots, taskmanagers."""
-    is_init, error_msg = check_initialized()
+async def get_cluster_info(connection: str = "default") -> str:
+    """Fetch an overview of the Flink cluster: jobs, slots, taskmanagers.
+
+    Args:
+        connection: Name of the registered Flink connection to use (see
+                    initialize_flink_connection). Defaults to "default".
+    """
+    is_init, error_msg = check_initialized(connection)
     if not is_init:
         return error_msg
-    
-    url = f"{FLINK_CONNECTION['url']}/overview"
+
+    url = f"{CONNECTIONS[connection]['url']}/overview"
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(url)
@@ -105,13 +130,17 @@ async def get_cluster_info() -> str:
 
 
 @mcp.tool()
-async def list_jobs() -> str:
-    """List all current and recent Flink jobs with their status."""
-    is_init, error_msg = check_initialized()
+async def list_jobs(connection: str = "default") -> str:
+    """List all current and recent Flink jobs with their status.
+
+    Args:
+        connection: Name of the registered Flink connection to use. Defaults to "default".
+    """
+    is_init, error_msg = check_initialized(connection)
     if not is_init:
         return error_msg
-    
-    url = f"{FLINK_CONNECTION['url']}/jobs/overview"
+
+    url = f"{CONNECTIONS[connection]['url']}/jobs/overview"
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(url)
@@ -133,16 +162,21 @@ async def list_jobs() -> str:
 
 
 @mcp.tool()
-async def get_job_details(job_id: str) -> str:
-    """Get comprehensive details of a specific Flink job by job ID including configuration, 
-    vertices, metrics, and execution plan."""
-    is_init, error_msg = check_initialized()
+async def get_job_details(job_id: str, connection: str = "default") -> str:
+    """Get comprehensive details of a specific Flink job by job ID including configuration,
+    vertices, metrics, and execution plan.
+
+    Args:
+        job_id: Flink job ID
+        connection: Name of the registered Flink connection to use. Defaults to "default".
+    """
+    is_init, error_msg = check_initialized(connection)
     if not is_init:
         return error_msg
-    
+
     # Fetch both job details and config in parallel
-    details_url = f"{FLINK_CONNECTION['url']}/jobs/{job_id}"
-    config_url = f"{FLINK_CONNECTION['url']}/jobs/{job_id}/config"
+    details_url = f"{CONNECTIONS[connection]['url']}/jobs/{job_id}"
+    config_url = f"{CONNECTIONS[connection]['url']}/jobs/{job_id}/config"
     
     job_data = None
     config_data = None
@@ -464,13 +498,17 @@ def _chunk(seq, n):
         
 
 @mcp.tool()
-async def list_taskmanagers() -> str:
-    """List all registered TaskManagers in the Flink cluster with detailed resource information."""
-    is_init, error_msg = check_initialized()
+async def list_taskmanagers(connection: str = "default") -> str:
+    """List all registered TaskManagers in the Flink cluster with detailed resource information.
+
+    Args:
+        connection: Name of the registered Flink connection to use. Defaults to "default".
+    """
+    is_init, error_msg = check_initialized(connection)
     if not is_init:
         return error_msg
-    
-    url = f"{FLINK_CONNECTION['url']}/taskmanagers"
+
+    url = f"{CONNECTIONS[connection]['url']}/taskmanagers"
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(url)
@@ -648,13 +686,18 @@ async def list_taskmanagers() -> str:
 
 
 @mcp.tool()
-async def get_job_exceptions(job_id: str) -> str:
-    """Fetch exceptions that occurred in the specified job."""
-    is_init, error_msg = check_initialized()
+async def get_job_exceptions(job_id: str, connection: str = "default") -> str:
+    """Fetch exceptions that occurred in the specified job.
+
+    Args:
+        job_id: Flink job ID
+        connection: Name of the registered Flink connection to use. Defaults to "default".
+    """
+    is_init, error_msg = check_initialized(connection)
     if not is_init:
         return error_msg
-    
-    url = f"{FLINK_CONNECTION['url']}/jobs/{job_id}/exceptions"
+
+    url = f"{CONNECTIONS[connection]['url']}/jobs/{job_id}/exceptions"
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(url)
@@ -729,13 +772,17 @@ async def get_job_exceptions(job_id: str) -> str:
 
 
 @mcp.tool()
-async def list_jar_files() -> str:
-    """List all uploaded JARs in the Flink cluster."""
-    is_init, error_msg = check_initialized()
+async def list_jar_files(connection: str = "default") -> str:
+    """List all uploaded JARs in the Flink cluster.
+
+    Args:
+        connection: Name of the registered Flink connection to use. Defaults to "default".
+    """
+    is_init, error_msg = check_initialized(connection)
     if not is_init:
         return error_msg
-    
-    url = f"{FLINK_CONNECTION['url']}/jars"
+
+    url = f"{CONNECTIONS[connection]['url']}/jars"
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(url)
@@ -753,13 +800,18 @@ async def list_jar_files() -> str:
 
 
 @mcp.tool()
-async def get_job_metrics(job_id: str) -> str:
-    """Fetch selected useful metrics for a running Flink job; produce a diagnostic summary."""
-    is_init, error_msg = check_initialized()
+async def get_job_metrics(job_id: str, connection: str = "default") -> str:
+    """Fetch selected useful metrics for a running Flink job; produce a diagnostic summary.
+
+    Args:
+        job_id: Flink job ID
+        connection: Name of the registered Flink connection to use. Defaults to "default".
+    """
+    is_init, error_msg = check_initialized(connection)
     if not is_init:
         return error_msg
 
-    base_url = f"{FLINK_CONNECTION['url'].rstrip('/')}/jobs/{job_id}/metrics"
+    base_url = f"{CONNECTIONS[connection]['url'].rstrip('/')}/jobs/{job_id}/metrics"
 
     # Curated set for analysis & tuning (kept small for clarity; extend as needed)
     common = [
@@ -925,12 +977,13 @@ async def get_job_metrics(job_id: str) -> str:
 # New 
 
 @mcp.tool()
-async def get_taskmanager_details(taskmanager_id: str) -> str:
+async def get_taskmanager_details(taskmanager_id: str, connection: str = "default") -> str:
     """Get comprehensive details about a specific TaskManager including metrics.
-    
+
     Args:
         taskmanager_id: TaskManager ID (e.g., '172.20.0.3:38373-66c42c')
-        
+        connection: Name of the registered Flink connection to use. Defaults to "default".
+
     Returns detailed information about:
     - Basic info (ID, ports, heartbeat)
     - Slot allocation and usage
@@ -943,12 +996,12 @@ async def get_taskmanager_details(taskmanager_id: str) -> str:
     This is more detailed than list_taskmanagers which shows all TaskManagers.
     Use this when you need to deep-dive into a specific TaskManager.
     """
-    is_init, error_msg = check_initialized()
+    is_init, error_msg = check_initialized(connection)
     if not is_init:
         return error_msg
-    
-    url = f"{FLINK_CONNECTION['url']}/taskmanagers/{taskmanager_id}"
-    
+
+    url = f"{CONNECTIONS[connection]['url']}/taskmanagers/{taskmanager_id}"
+
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(url)
@@ -1115,15 +1168,17 @@ async def get_taskmanager_details(taskmanager_id: str) -> str:
 @mcp.tool()
 async def get_taskmanager_metrics(
     taskmanager_id: str,
-    metric_names: Optional[str] = None
+    metric_names: Optional[str] = None,
+    connection: str = "default"
 ) -> str:
     """Get specific metrics for a TaskManager.
-    
+
     Args:
         taskmanager_id: TaskManager ID
         metric_names: Optional comma-separated list of metric names to query.
                      If not provided, returns list of available metrics.
-                     
+        connection: Name of the registered Flink connection to use. Defaults to "default".
+
     Common metrics to query:
     - Status.JVM.CPU.Load: CPU usage
     - Status.JVM.Memory.Heap.Used/Max: Heap memory
@@ -1135,11 +1190,11 @@ async def get_taskmanager_metrics(
     Example:
         metric_names="Status.JVM.CPU.Load,Status.JVM.Memory.Heap.Used"
     """
-    is_init, error_msg = check_initialized()
+    is_init, error_msg = check_initialized(connection)
     if not is_init:
         return error_msg
-    
-    base_url = f"{FLINK_CONNECTION['url']}/taskmanagers/{taskmanager_id}/metrics"
+
+    base_url = f"{CONNECTIONS[connection]['url']}/taskmanagers/{taskmanager_id}/metrics"
     
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
@@ -1231,13 +1286,14 @@ async def get_taskmanager_metrics(
 
 
 @mcp.tool()
-async def get_vertex_backpressure(job_id: str, vertex_id: str) -> str:
+async def get_vertex_backpressure(job_id: str, vertex_id: str, connection: str = "default") -> str:
     """Get backpressure information for a specific operator/vertex.
-    
+
     Args:
         job_id: Job ID
         vertex_id: Vertex/operator ID
-        
+        connection: Name of the registered Flink connection to use. Defaults to "default".
+
     Returns:
     - Overall backpressure status (ok, low, high)
     - Backpressure level/ratio (0.0 to 1.0)
@@ -1251,11 +1307,11 @@ async def get_vertex_backpressure(job_id: str, vertex_id: str) -> str:
     
     Use this to identify performance bottlenecks in your job.
     """
-    is_init, error_msg = check_initialized()
+    is_init, error_msg = check_initialized(connection)
     if not is_init:
         return error_msg
-    
-    url = f"{FLINK_CONNECTION['url']}/jobs/{job_id}/vertices/{vertex_id}/backpressure"
+
+    url = f"{CONNECTIONS[connection]['url']}/jobs/{job_id}/vertices/{vertex_id}/backpressure"
     
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:

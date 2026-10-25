@@ -30,6 +30,20 @@ The Apache Flink MCP Server bridges the gap between AI assistants and Apache Fli
 9. `list_jar_files` – List uploaded JAR files
 10. `send mail` – (Send an email notification)
 
+### 🔀 Multiple Flink clusters
+
+`initialize_flink_connection` and `get_connection_status` take an optional `connection` name (defaults to `"default"`). Every other tool also takes an optional `connection` argument, so you can register more than one Flink app/cluster and target them independently in the same server process:
+
+```
+initialize_flink_connection(flink_url="http://localhost:8081", connection="orders-pipeline")
+initialize_flink_connection(flink_url="http://localhost:8091", connection="clickstream-pipeline")
+
+get_cluster_info(connection="orders-pipeline")
+list_jobs(connection="clickstream-pipeline")
+```
+
+Omitting `connection` keeps working exactly as before, against the single `"default"` connection.
+
 ---
 
 ### 🚀 Benefits
