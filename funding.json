@@ -1,0 +1,64 @@
+{
+  "$schema": "https://fundingjson.org/schema/v1.1.0.json",
+  "version": "v1.1.0",
+  "entity": {
+    "type": "individual",
+    "role": "maintainer",
+    "name": "Mohammed Ashfaq",
+    "email": "ash001x@gmail.com",
+    "description": "Backend/full-stack developer based in India, maintaining open-source Apache Flink tooling solo alongside full-time employment: a Flink SQL connector for Qdrant (the only one that exists) and an MCP server that lets AI assistants operate Flink clusters via natural language.",
+    "webpageUrl": {
+      "url": "https://github.com/Ashfaqbs"
+    }
+  },
+  "projects": [
+    {
+      "guid": "apache-flink-mcp-server",
+      "name": "Apache Flink MCP Server",
+      "description": "A Model Context Protocol (MCP) server that lets AI assistants and LLMs interact with Apache Flink clusters through natural language: cluster/job monitoring, metrics, exception tracking, TaskManager resources, and multi-cluster support. No official or well-known MCP server exists for Flink; this fills that gap.",
+      "webpageUrl": {
+        "url": "https://github.com/Ashfaqbs/apache-flink-mcp-server"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/Ashfaqbs/apache-flink-mcp-server"
+      },
+      "licenses": ["spdx:MIT"],
+      "tags": ["apache-flink", "mcp", "ai-agents", "developer-tools", "streaming"]
+    },
+    {
+      "guid": "flink-connector-qdrant",
+      "name": "flink-connector-qdrant",
+      "description": "A Flink SQL connector that writes streaming results directly into Qdrant, a widely-used vector database, with no custom DataStream job or hand-rolled client plumbing required. As of this writing, no official or well-known community Flink connector exists for Qdrant; this closes that gap with a proper dynamic table factory.",
+      "webpageUrl": {
+        "url": "https://github.com/Ashfaqbs/flink-connector-qdrant"
+      },
+      "repositoryUrl": {
+        "url": "https://github.com/Ashfaqbs/flink-connector-qdrant"
+      },
+      "licenses": ["spdx:Apache-2.0"],
+      "tags": ["apache-flink", "qdrant", "vector-database", "streaming", "rag"]
+    }
+  ],
+  "funding": {
+    "channels": [
+      {
+        "guid": "email-contact",
+        "type": "other",
+        "address": "ash001x@gmail.com",
+        "description": "Email for bank transfer details or other payment arrangements."
+      }
+    ],
+    "plans": [
+      {
+        "guid": "maintainer-time",
+        "status": "active",
+        "name": "Dedicated maintainer time",
+        "description": "Funding would go toward dedicated development time to close known gaps: write operations and a tested CI pipeline for apache-flink-mcp-server, and a lookup/source side plus stronger ordering guarantees for flink-connector-qdrant.",
+        "amount": 0,
+        "currency": "INR",
+        "frequency": "one-time",
+        "channels": ["email-contact"]
+      }
+    ]
+  }
+}
