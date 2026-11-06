@@ -1,5 +1,7 @@
 # Apache Flink MCP Server
 
+[![Glama MCP Server](https://glama.ai/mcp/servers/Ashfaqbs/apache-flink-mcp-server/badge)](https://glama.ai/mcp/servers/Ashfaqbs/apache-flink-mcp-server)
+
 A Model Context Protocol (MCP) server implementation for Apache Flink that enables AI assistants and large language models to interact with Flink clusters through natural language interfaces. This server provides comprehensive tools for monitoring, managing, and analyzing Apache Flink streaming applications.
 
 This project is tested with BrowserStack
