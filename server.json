@@ -1,0 +1,10 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.Ashfaqbs/apache-flink-mcp-server",
+  "description": "MCP server for monitoring Apache Flink clusters via natural language, multi-cluster support.",
+  "version": "1.0.0",
+  "repository": {
+    "url": "https://github.com/Ashfaqbs/apache-flink-mcp-server",
+    "source": "github"
+  }
+}
